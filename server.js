@@ -12,8 +12,8 @@ process.stdin.on('data', (text)=>{
 
 	switch(command){
 		case 'quit\n':
-			// We're done, let's kill the process
-			exit();
+			console.log('Good Bye');
+			process.exit();
 			break;
 		case 'create': 
 			// Get todo text and update todos.txt
@@ -25,9 +25,9 @@ process.stdin.on('data', (text)=>{
 		case 'update':
 			//get index and the text of the todo
 			//control index is a number
-			let indexUpdate = textAsArray[1];
+			let indexUpdate = parseInt(textAsArray[1]);
 			let newTodoText = textAsArray.slice(2).join(' ');
-			if(typeof parseInt(indexUpdate) !== 'number'){
+			if(isNaN(indexUpdate)){
 				console.log('You must enter the index of the todo you want to update.');
 			}else{
 				updateTodo(indexUpdate, newTodoText);
@@ -36,7 +36,7 @@ process.stdin.on('data', (text)=>{
 		case 'delete':
 			//get index, control it is a number
 			let indexDelete = textAsArray[1];
-			if(typeof parseInt(indexDelete) !== 'number'){
+			if(isNaN(indexDelete)){
 				console.log('You must enter the index of the todo you want to delete.');
 			}else{
 				deleteTodo(indexDelete);
@@ -50,10 +50,6 @@ process.stdin.on('data', (text)=>{
 	}
 });
 
-function exit(){
-	console.log('Good Bye');
-	process.exit();
-}
 
 function getTodosFromFile(){
 	let todos = fs.readFileSync('todos.txt', {encoding: 'utf-8'});
@@ -65,6 +61,7 @@ function displayTodos(todosArray){
 	for(let i = 0; i < todosArray.length; i++){
 		console.log(i + ') ' + todosArray[i]);
 	}
+	
 	console.log('\n');
 	displayInstructions();
 	console.log('\n');
@@ -80,20 +77,27 @@ function updateTodo(index, todo){
 	// Get todos in case it changed since we launched the program
 	let todos = getTodosFromFile();
 	//Update todo
+	if(index > todos.length -1 || index < 0){
+		console.log('Index out of range');
+		return;
+	}
 	todos[index] = todo;
 	let updatedTodos = todos.join('|');
 	//Update the file
 	fs.writeFileSync('todos.txt', updatedTodos);
-	let newTodos = getTodosFromFile();
 	console.log('\nTodo Updated! \n ');
-	displayTodos(newTodos);
+	displayTodos(todos);
 }
 
 function deleteTodo(index){
 	let todos = getTodosFromFile();
+	if(index > todos.length -1 || index < 0){
+		console.log('Index out of range');
+		return;
+	}
 	todos.splice(index, 1);
 	let updatedTodos = todos.join('|');
 	fs.writeFileSync('todos.txt', updatedTodos);
-	let newTodos = getTodosFromFile();
-	displayTodos(newTodos);
+	console.log('\nTodo Deleted!\n');
+	displayTodos(todos);
 }
